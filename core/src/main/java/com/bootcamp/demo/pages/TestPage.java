@@ -9,99 +9,81 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Scaling;
 import com.bootcamp.demo.engine.Resources;
+import com.bootcamp.demo.engine.widgets.WidgetsContainer;
 import com.bootcamp.demo.pages.core.APage;
 import lombok.Getter;
 
 public class TestPage extends APage {
-    public static String SQUIRCLE = "basics/white-squircle-35";
+    public static String SQUIRCLE = "basics/ui-white-squircle-10";
 
     @Override
     protected void constructContent(Table content) {
-        MainContainer mainContainer = new MainContainer();
+        Table mainContainer = createMainContainer();
+        Table UIOverlaySegment = new Table();
+        Table powerBarSegment = new Table();
+
         content.setFillParent(true);
+        content.add(UIOverlaySegment).growX().expandY().top();
         content.add(mainContainer).growX().expandY().bottom();
+        UIOverlaySegment.add(powerBarSegment).size(225).expand().bottom();
     }
 
-    public final class MainContainer extends Table {
-        StatsContainer statsContainer;
-        GearContainer gearContainer;
-        OtherContainer otherContainer;
+    public Table createMainContainer() {
+        Table mainContainer = new Table();
+        mainContainer.defaults().pad(30.0F); // FIX: use mainContainer instead of `this`
+        mainContainer.setBackground(Resources.getDrawable(SQUIRCLE, Color.valueOf("#FFFBDB")));
 
-        public MainContainer() {
-            defaults().pad(30);
-            setBackground(Resources.getDrawable(SQUIRCLE, Color.valueOf("#FFFBDB")));
+        Table StatsContainer = this.constructStatsSegment();
+        Table GearContainer = this.constructGearSegment();
+        Table ButtonsContainer = this.constructButtonSegment();
 
-            final Table segmentContainerOne = constructStatsSegment();
-            final Table segmentContainerTwo = constructGearSegment();
-            final Table segmentContainerThree = constructOtherSegment();
+        mainContainer.add(StatsContainer).expandX().fillX().pad(20.0F).height(300.0F);
+        mainContainer.row();
+        mainContainer.add(GearContainer).expand().fill().pad(20.0F).height(400.0F);
+        mainContainer.row();
+        mainContainer.add(ButtonsContainer).expandX().fillX().pad(20.0F).height(150.0F);
 
-            add(segmentContainerOne).expandX().fillX().pad(20).height(300);
-            row();
-            add(segmentContainerTwo).expand().fill().pad(20).height(400);
-            row();
-            add(segmentContainerThree).expandX().fillX().pad(20).height(150);
-
-            this.pack();
-        }
-
-        private Table constructStatsSegment() {
-            statsContainer = new StatsContainer();
-            Table table = new Table();
-            table.setBackground(Resources.getDrawable(SQUIRCLE, Color.valueOf("#30362F")));
-            table.add(statsContainer).expand().fill();
-            return table;
-        }
-
-        private Table constructGearSegment() {
-            gearContainer = new GearContainer();
-            Table table = new Table();
-            table.setBackground(Resources.getDrawable(SQUIRCLE, Color.valueOf("#30362F")));
-            table.add(gearContainer).expand().fill();
-            return table;
-        }
-
-        private Table constructOtherSegment() {
-            otherContainer = new OtherContainer();
-            Table table = new Table();
-            table.setBackground(Resources.getDrawable(SQUIRCLE, Color.valueOf("#30362F")));
-            table.add(otherContainer).expand().fill();
-            return table;
-        }
+        return mainContainer;
     }
 
-    public static class WidgetContainer<T extends Table> extends Table {
-        private Array<T> children = new Array<>();
 
-        public void addWidget(T widget) {
-            children.add(widget);
-            add(widget).row();
-        }
-
-        public Array<T> getWidgets() {
-            return children;
-        }
+    private Table constructStatsSegment() {
+        Table statsSegment = new Table();
+        StatsContainer statsContainer = new StatsContainer();
+        Table button = new Table();
+        statsSegment.add(statsContainer);
+        statsSegment.add(button).size(100).pad(10);
+        return statsSegment;
     }
 
-    public static final class StatsContainer extends WidgetContainer<StatsWidget> {
+    private Table constructGearSegment() {
+        EquippedGear equippedGear = new EquippedGear();
+        TacticalGear tacticalGear = new TacticalGear();
+
+        Table table = new Table();
+        table.setBackground(Resources.getDrawable(SQUIRCLE, Color.valueOf("#30362F")));
+
+        table.add(equippedGear).expand().fill();
+        table.add(tacticalGear).expand().fill();
+        return table;
+    }
+
+    public Table constructButtonSegment()
+    {
+        Table buttonSegment = new Table();
+        buttonSegment.setBackground(Resources.getDrawable(SQUIRCLE, Color.valueOf("#625834")));
+        for (int i = 0; i < 3; i++) {
+            Table button = new Table();
+            button.setBackground(Resources.getDrawable(SQUIRCLE, Color.RED));
+            buttonSegment.add(button).expandY();
+        }
+        return buttonSegment;
+    }
+
+    public static final class StatsContainer extends WidgetsContainer<StatsWidget>
+    {
         public StatsContainer() {
-            Table segment = new Table();
-            this.add(segment).grow().pad(10);
-
-            final Table subSegment1 = constructSegmentTable();
-            final Table subSegment2 = constructSegmentTable();
-
-            segment.add(subSegment1).expand().fill().pad(10);
-            segment.add(subSegment2).size(100).pad(10);
-            segment.row();
-
-            final Table labelTable1 = new Table();
-            final Table labelTable2 = new Table();
-            labelTable1.defaults().expandX().fillX().pad(10);
-            labelTable2.defaults().expandX().fillX().pad(10);
-
-            subSegment1.add(labelTable1).expand().fill();
-            subSegment1.add(labelTable2).expand().fill();
-            subSegment1.row();
+            super(3);
 
             StatsWidget[] widgets = new StatsWidget[]{
                 new StatsWidget("Health", 100),
@@ -109,114 +91,67 @@ public class TestPage extends APage {
                 new StatsWidget("Strength", 50),
                 new StatsWidget("Agility", 60),
                 new StatsWidget("Intelligence", 70),
+                new StatsWidget("Luck", 20),
+                new StatsWidget("Agility", 60),
+                new StatsWidget("Intelligence", 70),
                 new StatsWidget("Luck", 20)
             };
 
-            for (int i = 0; i < 3; i++) {
-                labelTable1.add(widgets[i]).fillX().expandX();
+            for (int i = 0; i < 9; i++) {
+                add(widgets[i]);
                 widgets[i].setBackground(Resources.getDrawable(SQUIRCLE, Color.valueOf("#A59132")));
-                labelTable1.row();
             }
-            for (int i = 3; i < 6; i++) {
-                labelTable2.add(widgets[i]).fillX().expandX();
-                widgets[i].setBackground(Resources.getDrawable(SQUIRCLE, Color.valueOf("#A59132")));
-                labelTable2.row();
-            }
-        }
-
-        private Table constructSegmentTable() {
-            Table table = new Table();
-            table.setBackground(Resources.getDrawable(SQUIRCLE, Color.valueOf("#625834")));
-            return table;
         }
     }
 
-    public static final class GearContainer extends WidgetContainer<GearWidget> {
-        public GearContainer() {
-            Table segment = new Table();
-            add(segment).expand().fill(); // Make the segment fill GearContainer
+    public Table createGearSegment()
+    {
+        Table gearSegment = new Table();
+        Table equippedGearWrapper = new Table();
+        Table tacticalGearWrapper = new Table();
+        EquippedGear equippedGear = new EquippedGear();
+        TacticalGear tacticalGear = new TacticalGear();
+        gearSegment.setBackground(Resources.getDrawable(SQUIRCLE, Color.WHITE));
 
-            final Table subSegment = constructSegmentTable();
-            final Table subSegment2 = constructSegmentTable();
+        gearSegment.add(equippedGearWrapper);
+        gearSegment.add(tacticalGearWrapper);
+        equippedGearWrapper.add(equippedGear);
+        tacticalGearWrapper.add(tacticalGear);
+        return gearSegment;
+    }
 
-            segment.defaults().fill().pad(30); // Only fill, not expand by default
-
-            segment.add(subSegment).expandX().fillX(); // This one expands horizontally
-            segment.add(subSegment2).width(300);       // This one keeps fixed width
-
-
-    /*        for (int i = 0; i < 1; i++) {
+    public static final class EquippedGear extends WidgetsContainer<GearWidget>
+    {
+        public EquippedGear() {
+            super(3);
+            defaults().fill().pad(30); // Only fill, not expand by default
+            for (int i = 0; i < 6; i++) {
                 GearWidget widget = new GearWidget(SQUIRCLE);
-                subSegment.add(widget).size(200); // Fixed square size
-                //if ((i + 1) % 3 == 0) subSegment.row(); // New row after every 3 widgets
-                addWidget(widget);
-            }*/
-
-            final Table bongo1 = new Table();
-            final Table bongo2 = new Table();
-            bongo1.defaults().expandX().fillX().height(60).pad(10);
-            bongo2.defaults().expandX().fillX().height(60).pad(10);
-
-            subSegment2.add(bongo1).expand().fill();
-            subSegment2.add(bongo2).expand().fill();
-            subSegment2.row();
-
-            Table pringles = new Table();
-            Table lays = new Table();
-            Table doritos = new Table();
-
-            pringles.setBackground(Resources.getDrawable(SQUIRCLE, Color.valueOf("#A59132")));
-            lays.setBackground(Resources.getDrawable(SQUIRCLE, Color.valueOf("#A59132")));
-            doritos.setBackground(Resources.getDrawable(SQUIRCLE, Color.valueOf("#A59132")));
-
-            bongo1.add(pringles).expandX().fillX().height(140).width(130).pad(10);
-            bongo1.row();
-            bongo1.add(lays).expandX().fillX().height(140).width(130).pad(10);
-            bongo2.add(doritos).expandY().fillY().height(300).width(120).padRight(10);
-
-            Table a = constructSegmentTable();
-            Table b = constructSegmentTable();
-            Table c = constructSegmentTable();
-            Table d = constructSegmentTable();
-
-            a.setBackground(Resources.getDrawable(SQUIRCLE, Color.valueOf("#6A3911")));
-            b.setBackground(Resources.getDrawable(SQUIRCLE, Color.valueOf("#6A3911")));
-            c.setBackground(Resources.getDrawable(SQUIRCLE, Color.valueOf("#6A3911")));
-            d.setBackground(Resources.getDrawable(SQUIRCLE, Color.valueOf("#6A3911")));
-
-            pringles.add(a).size(50);
-            pringles.add(b).size(50);
-            pringles.row();
-            pringles.add(c).size(50);
-            pringles.add(d).size(50);
-        }
-
-        private Table constructSegmentTable() {
-            Table table = new Table();
-            table.setBackground(Resources.getDrawable(SQUIRCLE, Color.valueOf("#625834")));
-            return table;
+                add(widget); // Fixed square size
+            }
         }
     }
 
-    public static final class OtherContainer extends WidgetContainer<StatsWidget> {
-        public OtherContainer() {
-            final Table sigma1 = constructSegmentTable();
-            final Table sigma2 = constructSegmentTable();
-            final Table sigma3 = constructSegmentTable();
-
-            add(sigma1).expandX().fillX().pad(20);
-            add(sigma2).expandX().fillX().pad(20);
-            add(sigma3).expandX().fillX().pad(20);
-        }
-
-        private Table constructSegmentTable() {
-            Table table = new Table();
-            table.setBackground(Resources.getDrawable(SQUIRCLE, Color.valueOf("#625834")));
-            return table;
+    public static final class TacticalGear extends WidgetsContainer<TacticalWidget>
+    {
+        public TacticalGear() {
+            super(3);
+            for (int i = 0; i < 3; i++) {
+                TacticalWidget tacticalWidget = new TacticalWidget(SQUIRCLE);
+                add(tacticalWidget);
+                if (i == 0)
+                {
+                    for (int j = 0; j < 4; j++) {
+                        TacticalWidget subWidgets = new TacticalWidget(SQUIRCLE);
+                        add(subWidgets);
+                    }
+                }
+            }
         }
     }
 
-    public static final class GearWidget extends Table {
+    public static final class GearWidget extends Table
+    {
         private Image gearImage;
         @Getter
         private String imagePath;
@@ -239,7 +174,32 @@ public class TestPage extends APage {
         }
     }
 
-    public static final class StatsWidget extends Table {
+    public static final class TacticalWidget extends Table
+    {
+        private Image gearImage;
+        @Getter
+        private String imagePath;
+
+        public TacticalWidget(String imagePath) {
+            this.imagePath = imagePath;
+            Drawable drawable = Resources.getDrawable(imagePath);
+            gearImage = new Image(drawable);
+            gearImage.setScaling(Scaling.fit);
+            gearImage.setAlign(Align.center);
+
+            setBackground(Resources.getDrawable(TestPage.SQUIRCLE, Color.valueOf("#FFFFFF")));
+            add(gearImage).expand().fill().pad(10);
+        }
+
+        public void updateImage(String newPath) {
+            this.imagePath = newPath;
+            Drawable drawable = Resources.getDrawable(newPath);
+            gearImage.setDrawable(drawable);
+        }
+    }
+
+    public static final class StatsWidget extends Table
+    {
         private Label nameLabel;
         private Label statLabel;
 
