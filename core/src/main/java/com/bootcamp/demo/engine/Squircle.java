@@ -7,6 +7,7 @@ import lombok.Getter;
 public enum Squircle {
     SQUIRCLE_35(35, "white-squircle"),
     SQUIRCLE_35_BORDER(35, "white-squircle-border"),
+    SQUIRCLE_15_BORDER(15, "white-squircle-border"),
     ;
 
     @Getter
