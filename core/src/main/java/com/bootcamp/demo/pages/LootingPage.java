@@ -5,7 +5,7 @@ import com.bootcamp.demo.pages.core.APage;
 
 public class LootingPage extends APage {
     @Override
-    protected void constructContent(Table content) {
+    protected void constructContent (Table content) {
 
     }
 }

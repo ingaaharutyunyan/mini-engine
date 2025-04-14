@@ -47,7 +47,6 @@ public class GameUI extends ScreenAdapter implements Disposable, EventListener {
 
         // construct
         mainPageCell = rootUI.add().grow();
-        API.get(PageManager.class).show(TestPage.class);
     }
 
     @Override
@@ -55,6 +54,9 @@ public class GameUI extends ScreenAdapter implements Disposable, EventListener {
         stage.act(delta);
         stage.draw();
 
+        if (Gdx.input.isKeyJustPressed(Input.Keys.T)) {
+            API.get(PageManager.class).show(TestPage.class);
+        }
     }
 
     @Override
